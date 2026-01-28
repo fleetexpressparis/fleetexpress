@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FleetExpress - Gestion Transport</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #FF6B35;
+            --primary-dark: #E85A2A;
+            --secondary: #004E89;
+            --secondary-light: #1A659E;
+            --success: #06D6A0;
+            --warning: #FFD23F;
+            --danger: #EF476F;
+            --dark: #1C1C1E;
+            --dark-light: #2C2C2E;
+            --gray: #8E8E93;
+            --light: #F2F2F7;
+            --white: #FFFFFF;
+            
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.12);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.16);
+        }
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #0F2027 0%, #203A43 50%, #2C5364 100%);
+            min-height: 100vh;
+            color: var(--dark);
+            overflow-x: hidden;
+        }
+        
+        /* Login Screen */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .login-box {
+            background: var(--white);
+            border-radius: 24px;
+            padding: 48px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .logo h1 {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        
+        .logo p {
+            color: var(--gray);
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--dark);
+            font-size: 14px;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--light);
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: 'Outfit', sans-serif;
+            transition: all 0.3s ease;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            font-family: 'Outfit', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--white);
+            box-shadow: 0 4px 16px rgba(255, 107, 53, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(255, 107, 53, 0.4);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        
+        /* Main App Container */
+        .app-container {
+            display: none;
+            min-height: 100vh;
+        }
+        
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            padding: 16px 24px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .header-title {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-weight: 700;
+        }
+        
+        .logout-btn {
+            padding: 8px 16px;
+            background: var(--light);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .logout-btn:hover {
+            background: var(--dark-light);
+            color: var(--white);
+        }
+        
+        /* Content */
+        .content {
+            padding: 32px 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+        
+        .stat-card {
+            background: var(--white);
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--primary), var(--secondary));
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: var(--gray);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        
+        .stat-value {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--dark);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .stat-change {
+            font-size: 12px;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+        
+        .stat-change.positive {
+            color: var(--success);
+        }
+        
+        .stat-change.negative {
+            color: var(--danger);
+        }
+        
+        /* Forms Section */
+        .form-section {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 32px;
+        }
+        
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: var(--dark);
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        
+        .btn-secondary {
+            background: var(--secondary);
+            color: var(--white);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--secondary-light);
+        }
+        
+        /* Table */
+        .table-container {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: var(--shadow-md);
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead {
+            background: var(--light);
+        }
+        
+        th {
+            padding: 16px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--dark);
+        }
+        
+        td {
+            padding: 16px;
+            border-bottom: 1px solid var(--light);
+        }
+        
+        tbody tr {
+            transition: background 0.2s;
+        }
+        
+        tbody tr:hover {
+            background: var(--light);
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .badge-success {
+            background: rgba(6, 214, 160, 0.1);
+            color: var(--success);
+        }
+        
+        .badge-warning {
+            background: rgba(255, 210, 63, 0.1);
+            color: #D4A100;
+        }
+        
+        .badge-danger {
+            background: rgba(239, 71, 111, 0.1);
+            color: var(--danger);
+        }
+        
+        .badge-info {
+            background: rgba(26, 101, 158, 0.1);
+            color: var(--secondary);
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid var(--light);
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--gray);
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .tab.active {
+            color: var(--primary);
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary);
+        }
+        
+        .tab:hover {
+            color: var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .login-box {
+                padding: 32px 24px;
+            }
+            
+            .content {
+                padding: 20px 16px;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            table {
+                font-size: 14px;
+            }
+            
+            th, td {
+                padding: 12px 8px;
+            }
+        }
+        
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .loading {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-box">
+            <div class="logo">
+                <h1>🚚 FleetExpress</h1>
+                <p>Plateforme de gestion transport</p>
+            </div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Type d'utilisateur</label>
+                    <select id="userType" required>
+                        <option value="">Sélectionnez...</option>
+                        <option value="admin">👨‍💼 Administrateur</option>
+                        <option value="driver">🚚 Chauffeur</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Nom / ID</label>
+                    <input type="text" id="userName" placeholder="Ex: Jean Dupont" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Code PIN</label>
+                    <input type="password" id="userPin" placeholder="1234" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Se connecter</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="appContainer" class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <div class="header-title">🚚 FleetExpress</div>
+            </div>
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar"></div>
+                <span id="currentUser"></span>
+                <button class="logout-btn" onclick="logout()">Déconnexion</button>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <!-- Admin View -->
+            <div id="adminView" style="display: none;">
+                <!-- Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Courses aujourd'hui</div>
+                        <div class="stat-value" id="todayDeliveries">0</div>
+                        <div class="stat-change positive" id="deliveryChange"></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">CA du jour</div>
+                        <div class="stat-value" id="todayRevenue">0€</div>
+                        <div class="stat-change positive" id="revenueChange"></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Chauffeurs actifs</div>
+                        <div class="stat-value" id="activeDrivers">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">CA du mois</div>
+                        <div class="stat-value" id="monthRevenue">0€</div>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('courses')">📋 Courses</button>
+                    <button class="tab" onclick="switchTab('drivers')">👤 Chauffeurs</button>
+                    <button class="tab" onclick="switchTab('stats')">📊 Statistiques</button>
+                </div>
+
+                <!-- Courses Tab -->
+                <div id="coursesTab" class="tab-content active">
+                    <div class="table-container">
+                        <h2 class="section-title">Liste des courses</h2>
+                        <table id="coursesTable">
+                            <thead>
+                                <tr>
+                                    <th>N°</th>
+                                    <th>Date</th>
+                                    <th>Chauffeur</th>
+                                    <th>Départ</th>
+                                    <th>Arrivée</th>
+                                    <th>Distance</th>
+                                    <th>Prix HT</th>
+                                    <th>Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody id="coursesBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Drivers Tab -->
+                <div id="driversTab" class="tab-content">
+                    <div class="table-container">
+                        <h2 class="section-title">Performance des chauffeurs</h2>
+                        <table id="driversTable">
+                            <thead>
+                                <tr>
+                                    <th>Chauffeur</th>
+                                    <th>Courses</th>
+                                    <th>KM parcourus</th>
+                                    <th>CA généré</th>
+                                    <th>Moy./course</th>
+                                </tr>
+                            </thead>
+                            <tbody id="driversBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Stats Tab -->
+                <div id="statsTab" class="tab-content">
+                    <div class="form-section">
+                        <h2 class="section-title">📈 Statistiques détaillées</h2>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-label">Total courses</div>
+                                <div class="stat-value" id="totalCourses">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Distance totale</div>
+                                <div class="stat-value" id="totalDistance">0 km</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">CA total</div>
+                                <div class="stat-value" id="totalRevenue">0€</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Prix moyen</div>
+                                <div class="stat-value" id="avgPrice">0€</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Driver View -->
+            <div id="driverView" style="display: none;">
+                <div class="form-section">
+                    <h2 class="section-title">➕ Nouvelle course</h2>
+                    <form id="deliveryForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Client</label>
+                                <input type="text" id="clientName" required placeholder="Nom du client">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Départ</label>
+                                <input type="text" id="departure" required placeholder="Ville de départ">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Arrivée</label>
+                                <input type="text" id="arrival" required placeholder="Ville d'arrivée">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Distance (km)</label>
+                                <input type="number" id="distance" required placeholder="120">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Prix HT (€)</label>
+                                <input type="number" id="price" required placeholder="350">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Statut</label>
+                                <select id="status" required>
+                                    <option value="En cours">En cours</option>
+                                    <option value="Terminée">Terminée</option>
+                                    <option value="Problème">Problème</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">✅ Enregistrer la course</button>
+                    </form>
+                </div>
+
+                <!-- My Deliveries -->
+                <div class="table-container">
+                    <h2 class="section-title">Mes courses</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>N°</th>
+                                <th>Date</th>
+                                <th>Client</th>
+                                <th>Trajet</th>
+                                <th>Distance</th>
+                                <th>Prix</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody id="myDeliveriesBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="stats-grid" style="margin-top: 32px;">
+                    <div class="stat-card">
+                        <div class="stat-label">Mes courses aujourd'hui</div>
+                        <div class="stat-value" id="myTodayDeliveries">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Mon CA aujourd'hui</div>
+                        <div class="stat-value" id="myTodayRevenue">0€</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total courses</div>
+                        <div class="stat-value" id="myTotalDeliveries">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total CA</div>
+                        <div class="stat-value" id="myTotalRevenue">0€</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Storage management using window.storage
+        let currentUser = null;
+        let userType = null;
+
+        // Initialize app
+        async function init() {
+            // Check if already logged in
+            const savedUser = localStorage.getItem('currentUser');
+            const savedType = localStorage.getItem('userType');
+            
+            if (savedUser && savedType) {
+                currentUser = savedUser;
+                userType = savedType;
+                showApp();
+                await loadData();
+            }
+        }
+
+        // Login
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const type = document.getElementById('userType').value;
+            const name = document.getElementById('userName').value;
+            const pin = document.getElementById('userPin').value;
+            
+            // Simple authentication (in real app, use proper auth)
+            if (pin.length >= 4) {
+                currentUser = name;
+                userType = type;
+                
+                // Save to localStorage
+                localStorage.setItem('currentUser', name);
+                localStorage.setItem('userType', type);
+                
+                // Save user to storage if doesn't exist
+                try {
+                    const userKey = `user:${name.toLowerCase().replace(/\s/g, '_')}`;
+                    const existingUser = await window.storage.get(userKey);
+                    if (!existingUser) {
+                        await window.storage.set(userKey, JSON.stringify({
+                            name: name,
+                            type: type,
+                            createdAt: new Date().toISOString()
+                        }));
+                    }
+                } catch (error) {
+                    console.log('User not stored:', error);
+                }
+                
+                showApp();
+                await loadData();
+            } else {
+                alert('Le PIN doit contenir au moins 4 chiffres');
+            }
+        });
+
+        // Show app
+        function showApp() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('appContainer').style.display = 'block';
+            
+            // Set user info
+            document.getElementById('currentUser').textContent = currentUser;
+            document.getElementById('userAvatar').textContent = currentUser.charAt(0).toUpperCase();
+            
+            // Show appropriate view
+            if (userType === 'admin') {
+                document.getElementById('adminView').style.display = 'block';
+                document.getElementById('driverView').style.display = 'none';
+            } else {
+                document.getElementById('adminView').style.display = 'none';
+                document.getElementById('driverView').style.display = 'block';
+                
+                // Add delivery form handler
+                document.getElementById('deliveryForm').addEventListener('submit', handleDeliverySubmit);
+            }
+        }
+
+        // Handle delivery submission
+        async function handleDeliverySubmit(e) {
+            e.preventDefault();
+            
+            const delivery = {
+                id: 'C' + Date.now(),
+                date: new Date().toISOString(),
+                driver: currentUser,
+                client: document.getElementById('clientName').value,
+                departure: document.getElementById('departure').value,
+                arrival: document.getElementById('arrival').value,
+                distance: parseFloat(document.getElementById('distance').value),
+                price: parseFloat(document.getElementById('price').value),
+                status: document.getElementById('status').value
+            };
+            
+            try {
+                // Save to storage
+                await window.storage.set(`delivery:${delivery.id}`, JSON.stringify(delivery), true);
+                
+                alert('✅ Course enregistrée avec succès !');
+                document.getElementById('deliveryForm').reset();
+                
+                // Reload data
+                await loadData();
+            } catch (error) {
+                alert('❌ Erreur lors de l\'enregistrement: ' + error.message);
+            }
+        }
+
+        // Load all data
+        async function loadData() {
+            try {
+                // Get all deliveries
+                const deliveriesResult = await window.storage.list('delivery:', true);
+                const deliveryKeys = deliveriesResult ? deliveriesResult.keys : [];
+                
+                const deliveries = [];
+                for (const key of deliveryKeys) {
+                    try {
+                        const result = await window.storage.get(key, true);
+                        if (result && result.value) {
+                            deliveries.push(JSON.parse(result.value));
+                        }
+                    } catch (error) {
+                        console.log('Error loading delivery:', error);
+                    }
+                }
+                
+                // Sort by date (newest first)
+                deliveries.sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                if (userType === 'admin') {
+                    updateAdminView(deliveries);
+                } else {
+                    updateDriverView(deliveries);
+                }
+            } catch (error) {
+                console.log('Error loading data:', error);
+            }
+        }
+
+        // Update admin view
+        function updateAdminView(deliveries) {
+            const today = new Date().toISOString().split('T')[0];
+            const thisMonth = new Date().toISOString().slice(0, 7);
+            
+            // Calculate stats
+            const todayDeliveries = deliveries.filter(d => d.date.startsWith(today));
+            const monthDeliveries = deliveries.filter(d => d.date.startsWith(thisMonth));
+            
+            const todayRevenue = todayDeliveries.reduce((sum, d) => sum + d.price, 0);
+            const monthRevenue = monthDeliveries.reduce((sum, d) => sum + d.price, 0);
+            
+            // Update stats
+            document.getElementById('todayDeliveries').textContent = todayDeliveries.length;
+            document.getElementById('todayRevenue').textContent = Math.round(todayRevenue) + '€';
+            document.getElementById('monthRevenue').textContent = Math.round(monthRevenue) + '€';
+            
+            // Active drivers (unique drivers today)
+            const activeDrivers = [...new Set(todayDeliveries.map(d => d.driver))].length;
+            document.getElementById('activeDrivers').textContent = activeDrivers;
+            
+            // Update courses table
+            const tbody = document.getElementById('coursesBody');
+            tbody.innerHTML = '';
+            
+            deliveries.slice(0, 20).forEach(delivery => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td><strong>${delivery.id}</strong></td>
+                    <td>${new Date(delivery.date).toLocaleDateString('fr-FR')}</td>
+                    <td>${delivery.driver}</td>
+                    <td>${delivery.departure}</td>
+                    <td>${delivery.arrival}</td>
+                    <td>${delivery.distance} km</td>
+                    <td><strong>${Math.round(delivery.price)}€</strong></td>
+                    <td><span class="badge badge-${getStatusClass(delivery.status)}">${delivery.status}</span></td>
+                `;
+            });
+            
+            // Update driver stats
+            updateDriverStats(deliveries);
+            
+            // Update global stats
+            const totalDistance = deliveries.reduce((sum, d) => sum + d.distance, 0);
+            const totalRevenue = deliveries.reduce((sum, d) => sum + d.price, 0);
+            const avgPrice = deliveries.length > 0 ? totalRevenue / deliveries.length : 0;
+            
+            document.getElementById('totalCourses').textContent = deliveries.length;
+            document.getElementById('totalDistance').textContent = Math.round(totalDistance) + ' km';
+            document.getElementById('totalRevenue').textContent = Math.round(totalRevenue) + '€';
+            document.getElementById('avgPrice').textContent = Math.round(avgPrice) + '€';
+        }
+
+        // Update driver stats table
+        function updateDriverStats(deliveries) {
+            const driverMap = {};
+            
+            deliveries.forEach(d => {
+                if (!driverMap[d.driver]) {
+                    driverMap[d.driver] = { count: 0, distance: 0, revenue: 0 };
+                }
+                driverMap[d.driver].count++;
+                driverMap[d.driver].distance += d.distance;
+                driverMap[d.driver].revenue += d.price;
+            });
+            
+            const tbody = document.getElementById('driversBody');
+            tbody.innerHTML = '';
+            
+            Object.entries(driverMap).forEach(([driver, stats]) => {
+                const row = tbody.insertRow();
+                const avgPerDelivery = stats.revenue / stats.count;
+                row.innerHTML = `
+                    <td><strong>${driver}</strong></td>
+                    <td>${stats.count}</td>
+                    <td>${Math.round(stats.distance)} km</td>
+                    <td><strong>${Math.round(stats.revenue)}€</strong></td>
+                    <td>${Math.round(avgPerDelivery)}€</td>
+                `;
+            });
+        }
+
+        // Update driver view
+        function updateDriverView(deliveries) {
+            const myDeliveries = deliveries.filter(d => d.driver === currentUser);
+            const today = new Date().toISOString().split('T')[0];
+            const todayDeliveries = myDeliveries.filter(d => d.date.startsWith(today));
+            
+            // Update stats
+            const todayRevenue = todayDeliveries.reduce((sum, d) => sum + d.price, 0);
+            const totalRevenue = myDeliveries.reduce((sum, d) => sum + d.price, 0);
+            
+            document.getElementById('myTodayDeliveries').textContent = todayDeliveries.length;
+            document.getElementById('myTodayRevenue').textContent = Math.round(todayRevenue) + '€';
+            document.getElementById('myTotalDeliveries').textContent = myDeliveries.length;
+            document.getElementById('myTotalRevenue').textContent = Math.round(totalRevenue) + '€';
+            
+            // Update table
+            const tbody = document.getElementById('myDeliveriesBody');
+            tbody.innerHTML = '';
+            
+            myDeliveries.slice(0, 20).forEach(delivery => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td><strong>${delivery.id}</strong></td>
+                    <td>${new Date(delivery.date).toLocaleDateString('fr-FR')}</td>
+                    <td>${delivery.client}</td>
+                    <td>${delivery.departure} → ${delivery.arrival}</td>
+                    <td>${delivery.distance} km</td>
+                    <td><strong>${Math.round(delivery.price)}€</strong></td>
+                    <td><span class="badge badge-${getStatusClass(delivery.status)}">${delivery.status}</span></td>
+                `;
+            });
+        }
+
+        // Get status badge class
+        function getStatusClass(status) {
+            if (status === 'Terminée') return 'success';
+            if (status === 'En cours') return 'warning';
+            if (status === 'Problème') return 'danger';
+            return 'info';
+        }
+
+        // Switch tabs
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tabName + 'Tab').classList.add('active');
+        }
+
+        // Logout
+        function logout() {
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('userType');
+            location.reload();
+        }
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>
